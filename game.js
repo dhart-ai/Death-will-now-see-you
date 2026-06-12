@@ -97,6 +97,7 @@ function applyOutcome(result) {
   repVialFill.style.width = ((state.reputation / CONFIG.MAX_REPUTATION) * 100) + "%"; // Update visual representation of reputation
   if(state.reputation <= 0) {
     gameOver();
+    return;
   }
   nextRound(); // Move to the next round after applying the outcome
 }
@@ -137,3 +138,28 @@ function winGame() {
   gameoverTitle.textContent = "You pleased Death.";
   gameoverMessage.textContent = "Good job! You win.";
 }
+
+const restartBtn = document.getElementById("restart-btn");
+
+restartBtn.addEventListener("click", () => {
+  state = {
+    currentRound: 0,
+    reputation: CONFIG.STARTING_REPUTATION,
+    gameState: "playing",
+    selectedIngredients: [],
+    lastRecipeUsed: null
+  };
+  gameoverScreen.classList.add("hidden");
+  patientNameEl.textContent = PATIENTS[0].name;
+  roundCounterEl.textContent = `Patient 1 of ${CONFIG.TOTAL_ROUNDS}`;
+
+  // reset patientReaction text to something neutral
+  patientReaction.textContent = "";
+
+  // reset repVialFill width to 100%
+  repVialFill.style.width = "100%";
+
+  // clear .selected from all ingredient buttons, updateSlots()
+  ingredientButtons.forEach(button => button.classList.remove("selected"));
+  updateSlots();
+});
