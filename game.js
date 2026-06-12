@@ -6,15 +6,15 @@ const CONFIG = {
   MAX_REPUTATION: 100,
   TOTAL_ROUNDS: 5,
   FAILED_RECIPE_PENALTY: -10,
-  SUSPICION_PENALTY: -15,
+  SUSPICION_PENALTY: -45,
 
   RECIPES: {
-    "nightshade+valerian_root": { name: "Quiet Passage",  delta: -5,  message: "Thanks, Doc... I feel strange." },
-    "chalk_powder+nightshade":  { name: "Obvious Poison", delta: -25, message: "What IS this?! Someone help!" },
+    "nightshade+valerian_root": { name: "Quiet Passage",  delta: +10,  message: "Thanks, Doc... I feel strange." },
+    "chalk_powder+nightshade":  { name: "Obvious Poison", delta: -60, message: "What IS this?! Someone help!" },
     "chalk_powder+peppermint_oil": { name: "Soothing Tonic", delta: +15, message: "I feel better already. Thank you." },
-    "peppermint_oil+valerian_root": { name: "Masked Remedy", delta: +5,  message: "Tastes a bit odd... but okay." },
-    "laudanum+valerian_root": { name: "The Long Sleep", delta: +10, message: "I feel... drowsy, but at peace." },
-    "foxglove_tincture+nightshade": { name: "Heart's Stop", delta: -30, message: "AAAGH— my chest—!!" },
+    "peppermint_oil+valerian_root": { name: "Masked Remedy", delta: -30,  message: "Tastes a bit odd... but okay." },
+    "laudanum+valerian_root": { name: "The Long Sleep", delta: -5, message: "I feel... drowsy, but at peace." },
+    "foxglove_tincture+nightshade": { name: "Heart's Stop", delta: -20, message: "AAAGH— my chest—!!" },
     "chalk_powder+iron_sulfate": { name: "Iron Stomach", delta: -12, message: "I... don't feel great, Doc." },
   }
 };
