@@ -13,6 +13,9 @@ const CONFIG = {
     "chalk_powder+nightshade":  { name: "Obvious Poison", delta: -25, message: "What IS this?! Someone help!" },
     "chalk_powder+peppermint_oil": { name: "Soothing Tonic", delta: +15, message: "I feel better already. Thank you." },
     "peppermint_oil+valerian_root": { name: "Masked Remedy", delta: +5,  message: "Tastes a bit odd... but okay." },
+    "laudanum+valerian_root": { name: "The Long Sleep", delta: +10, message: "I feel... drowsy, but at peace." },
+    "foxglove_tincture+nightshade": { name: "Heart's Stop", delta: -30, message: "AAAGH— my chest—!!" },
+    "chalk_powder+iron_sulfate": { name: "Iron Stomach", delta: -12, message: "I... don't feel great, Doc." },
   }
 };
 
@@ -66,4 +69,33 @@ ingredientButtons.forEach(button => {
 function updateSlots() {
   slot1.textContent = state.selectedIngredients[0] || "—";
   slot2.textContent = state.selectedIngredients[1] || "—";// Update the display of selected ingredients
+}
+
+const prescribeBtn = document.getElementById("prescribe-btn"); // Button to finalize prescription
+const repVialFill = document.getElementById("rep-vial-fill"); // Visual representation of reputation
+const patientReaction = document.getElementById("patient-reaction"); // Element to display patient's reaction message
+
+prescribeBtn.addEventListener("click", () => {
+  if (state.selectedIngredients.length !== 2) return;
+
+  const key = [...state.selectedIngredients].sort().join("+");
+
+  const result = CONFIG.RECIPES[key] || {
+    name: "Inert Mix",
+    delta: CONFIG.FAILED_RECIPE_PENALTY,
+    message: "...Is this medicine?"
+  };
+
+  applyOutcome(result);
+});
+
+function applyOutcome(result) {
+  // 1. Update reputation, clamped between 0 and MAX_REPUTATION
+  state.reputation = Math.max(0, Math.min(CONFIG.MAX_REPUTATION, state.reputation + result.delta));
+  
+  patientReaction.textContent = result.message; // Show patient's reaction message
+  repVialFill.style.width = ((state.reputation / CONFIG.MAX_REPUTATION) * 100) + "%"; // Update visual representation of reputation
+  if(state.reputation <= 0) {
+    gameOver();
+  }
 }
