@@ -98,4 +98,42 @@ function applyOutcome(result) {
   if(state.reputation <= 0) {
     gameOver();
   }
+  nextRound(); // Move to the next round after applying the outcome
+}
+
+const patientNameEl = document.getElementById("patient-name"); // Element to display current patient's name
+const roundCounterEl = document.getElementById("round-counter");
+const gameoverScreen = document.getElementById("gameover-screen");
+const gameoverTitle = document.getElementById("gameover-title");
+const gameoverMessage = document.getElementById("gameover-message");
+
+function nextRound() {
+  state.currentRound++;
+
+  if (state.currentRound >= CONFIG.TOTAL_ROUNDS) { // If we've completed all rounds, the player wins
+    winGame();
+    return;
+  }
+  else{
+    patientNameEl.textContent = PATIENTS[state.currentRound].name; // Update patient name for the new round
+    roundCounterEl.textContent = `Patient ${state.currentRound + 1} of ${CONFIG.TOTAL_ROUNDS}`; // Update round counter
+  }
+  state.selectedIngredients = [];// Clear selected ingredients for the new round
+  ingredientButtons.forEach(button => button.classList.remove("selected"));// Clear visual highlights from ingredient buttons
+  updateSlots();
+}
+
+function gameOver() {
+  state.gameState = "gameover";
+  gameoverScreen.classList.remove("hidden");
+  gameoverTitle.textContent = "You've Been Caught.";
+  gameoverMessage.textContent = "Your reputation crumbled to nothing.";
+}
+
+
+function winGame() {
+  state.gameState = "WIN";
+  gameoverScreen.classList.remove("hidden");
+  gameoverTitle.textContent = "You pleased Death.";
+  gameoverMessage.textContent = "Good job! You win.";
 }
