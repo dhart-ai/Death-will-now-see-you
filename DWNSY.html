@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Death Will Now See You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="DWNSY.css" />
+</head>
+<body>
+
+  <!-- HUD -->
+  <div id="hud">
+    <span id="round-counter">Patient 1 of 5</span>
+    <span id="rep-label">Reputation</span>
+    <div id="rep-vial-container">
+      <div id="rep-vial-fill"></div>
+    </div>
+  </div>
+
+  <!-- Main game screen -->
+  <div id="game-screen">
+
+    <!-- Left panel: patient -->
+    <div id="patient-panel">
+      <h2 id="patient-name">Patient Name</h2>
+      <div id="patient-portrait">?</div>
+      <p id="patient-reaction">Awaiting prescription...</p>
+    </div>
+
+    <!-- Divider -->
+    <div id="divider"></div>
+
+    <!-- Right panel: crafting -->
+    <div id="crafting-panel">
+      <h2 class="panel-title">Apothecary</h2>
+      <div id="ingredient-shelf">
+        <!-- Ingredient buttons go here -->
+        <button class="ingredient-btn" data-id="nightshade">Nightshade</button>
+        <button class="ingredient-btn" data-id="valerian_root">Valerian Root</button>
+        <button class="ingredient-btn" data-id="chalk_powder">Chalk Powder</button>
+        <button class="ingredient-btn" data-id="peppermint_oil">Peppermint Oil</button>
+      </div>
+
+      <div id="mixing-slots">
+        <div class="slot" id="slot-1">—</div>
+        <span>+</span>
+        <div class="slot" id="slot-2">—</div>
+      </div>
+
+      <button id="prescribe-btn">Prescribe</button>
+    </div>
+
+  </div>
+
+  <!-- Game over screen (hidden for now) -->
+  <div id="gameover-screen" class="hidden">
+    <h1 id="gameover-title">You've Been Caught.</h1>
+    <p id="gameover-message">Your reputation crumbled.</p>
+    <button id="restart-btn">Try Again</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
