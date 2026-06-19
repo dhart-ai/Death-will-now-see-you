@@ -1,165 +1,146 @@
-
-
-// all tunable values in one place
-const CONFIG = {
+// CONFIG
+const CONFIG = { // GAME SETTINGS
   STARTING_REPUTATION: 100,
   MAX_REPUTATION: 100,
-  TOTAL_ROUNDS: 5,
+  TOTAL_DAYS: 3,
+  PATIENTS_PER_DAY: 3,
   FAILED_RECIPE_PENALTY: -10,
-  SUSPICION_PENALTY: -45,
 
   RECIPES: {
-    "nightshade+valerian_root": { name: "Quiet Passage",  delta: +10,  message: "Thanks, Doc... I feel strange." },
-    "chalk_powder+nightshade":  { name: "Obvious Poison", delta: -60, message: "What IS this?! Someone help!" },
-    "chalk_powder+peppermint_oil": { name: "Soothing Tonic", delta: +15, message: "I feel better already. Thank you." },
-    "peppermint_oil+valerian_root": { name: "Masked Remedy", delta: -30,  message: "Tastes a bit odd... but okay." },
-    "laudanum+valerian_root": { name: "The Long Sleep", delta: -5, message: "I feel... drowsy, but at peace." },
-    "foxglove_tincture+nightshade": { name: "Heart's Stop", delta: -20, message: "AAAGH— my chest—!!" },
-    "chalk_powder+iron_sulfate": { name: "Iron Stomach", delta: -12, message: "I... don't feel great, Doc." },
+    "nightshade+valerian_root": { // making a recipe key by joining ingredient ids with a plus sign
+      name: "Quiet Passage",
+      delta: -5,
+      strength: 1,
+      daysToKill: 3,
+      detectable: false,
+      symptoms: [
+        "Complaining of unusual fatigue. Manageable for now.",
+        "Pale and refusing food. Something is wrong.",
+        "Found unresponsive this morning. Cause unclear."
+      ],
+      message: "Tastes a little bitter, Doctor..."
+    },
+    "chalk_powder+nightshade": {
+      name: "Obvious Poison",
+      delta: -25,
+      strength: 3,
+      daysToKill: 1,
+      detectable: true,
+      symptoms: [
+        "Collapsed violently. Neighbours heard screaming. Authorities notified."
+      ],
+      message: "Something is wrong — I can feel it!"
+    },
+    "chalk_powder+peppermint_oil": {
+      name: "Soothing Tonic",
+      delta: 15,
+      strength: 0,
+      daysToKill: null,
+      detectable: false,
+      symptoms: [
+        "Doing remarkably well. Colour returned to their face.",
+        "Recovering fully. Singing your praises around town.",
+        "Completely healed. Your reputation grows."
+      ],
+      message: "I feel better already. Thank you, Doctor."
+    },
+    "peppermint_oil+valerian_root": {
+      name: "Masked Remedy",
+      delta: 5,
+      strength: 0,
+      daysToKill: null,
+      detectable: false,
+      symptoms: [
+        "Seems stable. Mild drowsiness reported.",
+        "No change. Patient continues daily routine.",
+        "Recovered. Nothing remarkable to note."
+      ],
+      message: "Tastes a bit odd... but I suppose I trust you."
+    }
+  },
+
+  INERT: { // default "no effect" recipe for when no valid combination is made
+    name: "Inert Mix",
+    delta: -10,
+    strength: 0,
+    daysToKill: null,
+    detectable: true,
+    symptoms: [
+      "Patient feels no effect. Growing suspicious of your methods."
+    ],
+    message: "...Is this actually medicine?"
+  },
+
+  INGREDIENTS: { // available ingredients with labels and descriptions
+    nightshade:     { label: "Nightshade",     desc: "A potent toxin. Deadly in the right dose." },
+    valerian_root:  { label: "Valerian Root",  desc: "A calming herb. Masks the taste of bitterness." },
+    chalk_powder:   { label: "Chalk Powder",   desc: "A neutral filler. Binds other compounds together." },
+    peppermint_oil: { label: "Peppermint Oil", desc: "A pleasant flavour. Puts patients at ease." }
   }
 };
 
-// PATIENTS — one per round
-const PATIENTS = [
-  { name: "Edmund ScissorHead" },
-  { name: "Mary Osborn" },
-  { name: "Thomas Hawthorne" },
-  { name: "Clara Duloone" },
-  { name: "William ShankSpear"},
+// PATIENTS
+const ALL_PATIENTS = [ // 10 unique patients with names, portraits, and initial health
+  { name: "Edmund Hale",   portrait: "🧓", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "Mary Ashworth", portrait: "👩", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "Thomas Grigg",  portrait: "🧔", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "Clara Dunne",   portrait: "👵", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "Robert Ash",    portrait: "🧑", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "Agnes Moor",    portrait: "👧", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "William Foss",  portrait: "👴", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "Harriet Cole",  portrait: "🧕", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+  { name: "George Penn",   portrait: "🧒", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
 ];
 
-// GAME STATE — everything that changes at runtime
+// GAME STATE
 let state = {
-  currentRound: 0,
+  currentDay: 1,
+  currentPatientIndex: 0,
+  patientsSeenToday: 0,
   reputation: CONFIG.STARTING_REPUTATION,
   gameState: "playing",
   selectedIngredients: [],
   lastRecipeUsed: null,
+  activePatients: [],
 };
 
 // SANITY CHECK
 console.log("CONFIG loaded:", CONFIG);
 console.log("State loaded:", state);
-console.log("First patient:", PATIENTS[state.currentRound]);
+console.log("Day 1 patients:", ALL_PATIENTS.slice(0, 3));
 
-// Ingredient Selection
+// RENDER FUNCTIONS
+function renderPatient() { // updates the UI with the current patient's info and resets ingredient selections
+  const patient = ALL_PATIENTS[state.currentPatientIndex]; // get current patient based on index
 
-const ingredientButtons = document.querySelectorAll(".ingredient-btn");
-const slot1 = document.getElementById("slot-1"); 
-const slot2 = document.getElementById("slot-2");
+  document.getElementById("patient-name").textContent = patient.name;
+  document.getElementById("patient-portrait").textContent = patient.portrait;
+  document.getElementById("patient-reaction").textContent = "Awaiting prescription...";
 
-ingredientButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    const id = button.dataset.id;
+  document.getElementById("round-counter").textContent =
+    `Day ${state.currentDay} — Patient ${state.patientsSeenToday + 1} of ${CONFIG.PATIENTS_PER_DAY}`; // show current day and patient number
 
-    if (state.selectedIngredients.includes(id)) { // If already selected, deselect
-      state.selectedIngredients = state.selectedIngredients.filter(ingredient => ingredient !== id); // Deselect if already selected
-      button.classList.remove("selected"); // Remove visual highlight
-    } else {
-      if (state.selectedIngredients.length < 2) { // Only allow selection of 2 ingredients
-        state.selectedIngredients.push(id); // Add ingredient to selection
-        button.classList.add("selected"); // Add visual highlight
-      }
-    }
+  const repPercent = (state.reputation / CONFIG.MAX_REPUTATION) * 100; // calculate reputation percentage for the vial fill
+  document.getElementById("rep-vial-fill").style.width = repPercent + "%"; // update vial fill based on reputation
 
-    updateSlots(); // Update the display of selected ingredients
+  state.selectedIngredients = [];
+  document.querySelectorAll(".ingredient-btn").forEach(btn => btn.classList.remove("selected")); // reset ingredient button states
+  document.getElementById("slot-1").textContent = "—";
+  document.getElementById("slot-2").textContent = "—";
+}
+
+function renderIngredientDescriptions() {
+  document.querySelectorAll(".ingredient-btn").forEach(btn => {
+    const id = btn.dataset.id;
+    const info = CONFIG.INGREDIENTS[id]; // get ingredient info from config using data-id attribute
+    btn.title = info.desc;
   });
-});
-
-function updateSlots() {
-  slot1.textContent = state.selectedIngredients[0] || "—";
-  slot2.textContent = state.selectedIngredients[1] || "—";// Update the display of selected ingredients
 }
 
-const prescribeBtn = document.getElementById("prescribe-btn"); // Button to finalize prescription
-const repVialFill = document.getElementById("rep-vial-fill"); // Visual representation of reputation
-const patientReaction = document.getElementById("patient-reaction"); // Element to display patient's reaction message
-
-prescribeBtn.addEventListener("click", () => {
-  if (state.selectedIngredients.length !== 2) return;
-
-  const key = [...state.selectedIngredients].sort().join("+");
-
-  const result = CONFIG.RECIPES[key] || {
-    name: "Inert Mix",
-    delta: CONFIG.FAILED_RECIPE_PENALTY,
-    message: "...Is this medicine?"
-  };
-
-  applyOutcome(result);
-});
-
-function applyOutcome(result) {
-  // 1. Update reputation, clamped between 0 and MAX_REPUTATION
-  state.reputation = Math.max(0, Math.min(CONFIG.MAX_REPUTATION, state.reputation + result.delta));
-  
-  patientReaction.textContent = result.message; // Show patient's reaction message
-  repVialFill.style.width = ((state.reputation / CONFIG.MAX_REPUTATION) * 100) + "%"; // Update visual representation of reputation
-  if(state.reputation <= 0) {
-    gameOver();
-    return;
-  }
-  nextRound(); // Move to the next round after applying the outcome
+// INIT
+function init() {
+  renderIngredientDescriptions(); // set up ingredient button tooltips
+  renderPatient();
 }
 
-const patientNameEl = document.getElementById("patient-name"); // Element to display current patient's name
-const roundCounterEl = document.getElementById("round-counter");
-const gameoverScreen = document.getElementById("gameover-screen");
-const gameoverTitle = document.getElementById("gameover-title");
-const gameoverMessage = document.getElementById("gameover-message");
-
-function nextRound() {
-  state.currentRound++;
-
-  if (state.currentRound >= CONFIG.TOTAL_ROUNDS) { // If we've completed all rounds, the player wins
-    winGame();
-    return;
-  }
-  else{
-    patientNameEl.textContent = PATIENTS[state.currentRound].name; // Update patient name for the new round
-    roundCounterEl.textContent = `Patient ${state.currentRound + 1} of ${CONFIG.TOTAL_ROUNDS}`; // Update round counter
-  }
-  state.selectedIngredients = [];// Clear selected ingredients for the new round
-  ingredientButtons.forEach(button => button.classList.remove("selected"));// Clear visual highlights from ingredient buttons
-  updateSlots();
-}
-
-function gameOver() {
-  state.gameState = "gameover";
-  gameoverScreen.classList.remove("hidden");
-  gameoverTitle.textContent = "You've Been Caught.";
-  gameoverMessage.textContent = "Your reputation crumbled to nothing.";
-}
-
-
-function winGame() {
-  state.gameState = "WIN";
-  gameoverScreen.classList.remove("hidden");
-  gameoverTitle.textContent = "You pleased Death.";
-  gameoverMessage.textContent = "Good job! You win.";
-}
-
-const restartBtn = document.getElementById("restart-btn");
-
-restartBtn.addEventListener("click", () => {
-  state = {
-    currentRound: 0,
-    reputation: CONFIG.STARTING_REPUTATION,
-    gameState: "playing",
-    selectedIngredients: [],
-    lastRecipeUsed: null
-  };
-  gameoverScreen.classList.add("hidden");
-  patientNameEl.textContent = PATIENTS[0].name;
-  roundCounterEl.textContent = `Patient 1 of ${CONFIG.TOTAL_ROUNDS}`;
-
-  // reset patientReaction text to something neutral
-  patientReaction.textContent = "";
-
-  // reset repVialFill width to 100%
-  repVialFill.style.width = "100%";
-
-  // clear .selected from all ingredient buttons, updateSlots()
-  ingredientButtons.forEach(button => button.classList.remove("selected"));
-  updateSlots();
-});
+init();
