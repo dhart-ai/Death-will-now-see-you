@@ -1,4 +1,4 @@
-const CONFIG = {
+const CONFIG = { // GAME SETTINGS
   STARTING_REPUTATION: 100,
   MAX_REPUTATION: 100,
   TOTAL_DAYS: 3,
@@ -6,7 +6,7 @@ const CONFIG = {
   FAILED_RECIPE_PENALTY: -10,
 
   RECIPES: {
-    "nightshade+valerian_root": {
+    "nightshade+valerian_root": { // making a recipe key by joining ingredient ids with a plus sign
       name: "Quiet Passage",
       delta: -5,
       strength: 1,
@@ -119,7 +119,7 @@ const CONFIG = {
     }
   },
 
-  INERT: {
+  INERT: { // default "no effect" recipe for when no valid combination is made
     name: "Inert Mix",
     delta: -10,
     strength: 0,
@@ -131,7 +131,7 @@ const CONFIG = {
     message: "...Is this actually medicine?"
   },
 
-  INGREDIENTS: {
+  INGREDIENTS: { // available ingredients with labels and descriptions
     nightshade:        { label: "Nightshade",        desc: "A potent toxin. Deadly in the right dose." },
     valerian_root:      { label: "Valerian Root",      desc: "A calming herb. Masks the taste of bitterness." },
     chalk_powder:        { label: "Chalk Powder",        desc: "A neutral filler. Binds other compounds together." },
@@ -143,7 +143,7 @@ const CONFIG = {
 };
 
 // PATIENTS
-const ALL_PATIENTS = [ // 10 unique patients with names, portraits, and initial health
+const ALL_PATIENTS = [ // 9 unique patients with names, portraits, and initial health
   { name: "Edmund Hale",   portrait: "🧓", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
   { name: "Mary Ashworth", portrait: "👩", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
   { name: "Thomas Grigg",  portrait: "🧔", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
@@ -247,3 +247,94 @@ function updateSlots() {
 document.querySelectorAll(".ingredient-btn").forEach(btn => {
   btn.addEventListener("click", handleIngredientClick);
 });
+
+// STAGE 5: PRESCRIBE LOGIC
+
+function matchRecipe(ingredients) { // takes your two selected ingredients, sorts them alphabetically, joins them into a key like "nightshade+valerian_root", and looks that up in CONFIG.RECIPES
+
+  // Sort alphabetically and join with "+" so order doesn't matter
+  const key = [...ingredients].sort().join("+");
+
+  // Look for a match in CONFIG.RECIPES
+  return CONFIG.RECIPES[key] || CONFIG.INERT;
+}
+
+function handlePrescribe() {
+  // Don't allow prescribing with fewer than 2 ingredients
+  if (state.selectedIngredients.length !== 2) {
+    return;
+  }
+
+  const patient = ALL_PATIENTS[state.currentPatientIndex];
+  const recipe = matchRecipe(state.selectedIngredients);
+
+  // Check for consecutive identical recipe penalty
+  let delta = recipe.delta;
+  if (state.lastRecipeUsed === recipe.name && delta < 0) {
+    delta = delta * 2; // double the penalty
+  }
+
+  // Apply reputation change
+  state.reputation = Math.max(0, Math.min(CONFIG.MAX_REPUTATION, state.reputation + delta));
+  state.lastRecipeUsed = recipe.name;
+
+  // Store the prescription on the patient for the overnight results screen later
+  patient.prescription = recipe;
+  patient.daysRemaining = recipe.daysToKill;
+
+  // Show the patient's immediate reaction
+  document.getElementById("patient-reaction").textContent = recipe.message;
+
+  // Update the reputation bar
+  const repPercent = (state.reputation / CONFIG.MAX_REPUTATION) * 100;
+  document.getElementById("rep-vial-fill").style.width = repPercent + "%";
+
+  // Check for immediate game over
+  if (state.reputation <= 0) {
+    triggerGameOver();
+    return;
+  }
+
+  console.log(`Prescribed "${recipe.name}" to ${patient.name}. Reputation delta: ${delta}. New reputation: ${state.reputation}`);
+  handlePrescribeComplete();
+}
+
+function triggerGameOver() {
+  state.gameState = "gameover";
+  document.getElementById("gameover-screen").classList.remove("hidden");
+}
+
+// Attach click listener to Prescribe button
+document.getElementById("prescribe-btn").addEventListener("click", handlePrescribe);
+
+// STAGE 6: PATIENT / DAY PROGRESSION
+
+function handlePrescribeComplete() {
+  // Disable prescribing again until next patient loads
+  document.getElementById("prescribe-btn").classList.add("hidden"); // hide prescribe button
+  document.getElementById("next-btn").classList.remove("hidden"); // show next patient button
+}
+
+function goToNextPatient() {
+  state.patientsSeenToday++; // increment patients seen today
+  state.currentPatientIndex++; // move to next patient in the ALL_PATIENTS array
+
+  const dayComplete = state.patientsSeenToday >= CONFIG.PATIENTS_PER_DAY; // check if we've seen enough patients to complete the day
+
+  if (dayComplete) { // reset for next day
+    showOvernightResults(); // show overnight results before moving to next day
+  } else {
+    document.getElementById("next-btn").classList.add("hidden");
+    document.getElementById("prescribe-btn").classList.remove("hidden");
+    renderPatient();
+  }
+}
+
+function showOvernightResults() {
+  state.gameState = "results";
+  console.log("Day complete. Time to show overnight results (Stage 6 Part B).");
+  // We'll build the actual results screen next
+}
+
+// Attach click listener to Next Patient button
+document.getElementById("next-btn").addEventListener("click", goToNextPatient);
