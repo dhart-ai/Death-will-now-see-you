@@ -1,5 +1,4 @@
-// CONFIG
-const CONFIG = { // GAME SETTINGS
+const CONFIG = {
   STARTING_REPUTATION: 100,
   MAX_REPUTATION: 100,
   TOTAL_DAYS: 3,
@@ -7,7 +6,7 @@ const CONFIG = { // GAME SETTINGS
   FAILED_RECIPE_PENALTY: -10,
 
   RECIPES: {
-    "nightshade+valerian_root": { // making a recipe key by joining ingredient ids with a plus sign
+    "nightshade+valerian_root": {
       name: "Quiet Passage",
       delta: -5,
       strength: 1,
@@ -56,10 +55,71 @@ const CONFIG = { // GAME SETTINGS
         "Recovered. Nothing remarkable to note."
       ],
       message: "Tastes a bit odd... but I suppose I trust you."
+    },
+    "laudanum+nightshade": {
+      name: "The Long Sleep",
+      delta: -3,
+      strength: 1,
+      daysToKill: 3,
+      detectable: false,
+      symptoms: [
+        "Sleeping more than usual. Seems peaceful enough.",
+        "Difficult to wake this morning. Family is mildly concerned.",
+        "Passed quietly in their sleep. No one suspects foul play."
+      ],
+      message: "Mmm... I feel quite drowsy, Doctor."
+    },
+    "foxglove_tincture+laudanum": {
+      name: "Heart's Quiet",
+      delta: -15,
+      strength: 3,
+      daysToKill: 1,
+      detectable: true,
+      symptoms: [
+        "Passed in their sleep. Family is shaken but not suspicious — yet."
+      ],
+      message: "I feel... strange. So very tired..."
+    },
+    "foxglove_tincture+nightshade": {
+      name: "Heart's Failure",
+      delta: -30,
+      strength: 3,
+      daysToKill: 1,
+      detectable: true,
+      symptoms: [
+        "Heart stopped within the hour. A physician is being summoned to investigate."
+      ],
+      message: "My chest — something is terribly wrong!"
+    },
+    "chalk_powder+iron_sulfate": {
+      name: "Iron Stomach",
+      delta: -8,
+      strength: 0,
+      daysToKill: null,
+      detectable: true,
+      symptoms: [
+        "Nauseous and pale, but stable. Buys you time.",
+        "Still unwell. Beginning to ask questions.",
+        "Recovering slowly. Suspicion lingers."
+      ],
+      message: "My stomach... what did you give me?"
+    },
+    "laudanum+peppermint_oil": {
+      name: "Calm Recovery",
+      delta: 10,
+      strength: 0,
+      daysToKill: null,
+      detectable: false,
+      symptoms: [
+        "Resting comfortably. Trusts you completely.",
+        "Fully recovered. Recommends you to friends.",
+        "In excellent health. Your reputation grows."
+      ],
+      message: "I feel wonderfully calm. Thank you, Doctor."
     }
   },
 
-  INERT: { // default "no effect" recipe for when no valid combination is made
+  INERT: {
     name: "Inert Mix",
     delta: -10,
     strength: 0,
@@ -71,11 +131,14 @@ const CONFIG = { // GAME SETTINGS
     message: "...Is this actually medicine?"
   },
 
-  INGREDIENTS: { // available ingredients with labels and descriptions
-    nightshade:     { label: "Nightshade",     desc: "A potent toxin. Deadly in the right dose." },
-    valerian_root:  { label: "Valerian Root",  desc: "A calming herb. Masks the taste of bitterness." },
-    chalk_powder:   { label: "Chalk Powder",   desc: "A neutral filler. Binds other compounds together." },
-    peppermint_oil: { label: "Peppermint Oil", desc: "A pleasant flavour. Puts patients at ease." }
+  INGREDIENTS: {
+    nightshade:        { label: "Nightshade",        desc: "A potent toxin. Deadly in the right dose." },
+    valerian_root:      { label: "Valerian Root",      desc: "A calming herb. Masks the taste of bitterness." },
+    chalk_powder:        { label: "Chalk Powder",        desc: "A neutral filler. Binds other compounds together." },
+    peppermint_oil:      { label: "Peppermint Oil",      desc: "A pleasant flavour. Puts patients at ease." },
+    laudanum:            { label: "Laudanum",            desc: "A powerful sedative. Masks symptoms and suspicion." },
+    foxglove_tincture:   { label: "Foxglove Tincture",   desc: "Fast and lethal. Stops the heart — but draws attention." },
+    iron_sulfate:        { label: "Iron Sulfate",        desc: "A harsh irritant. Causes visible, suspicious symptoms." }
   }
 };
 
@@ -144,3 +207,43 @@ function init() {
 }
 
 init();
+
+// STAGE 4: INGREDIENT CLICK LOGIC
+
+function handleIngredientClick(event) {
+  const btn = event.currentTarget;
+  const id = btn.dataset.id; // get ingredient id from data attribute
+
+  // If already selected, clicking again deselects it
+  if (state.selectedIngredients.includes(id)) {
+    state.selectedIngredients = state.selectedIngredients.filter(ing => ing !== id);
+    btn.classList.remove("selected");
+    updateSlots();
+    return;
+  }
+
+  // Don't allow more than 2 ingredients selected at once
+  if (state.selectedIngredients.length >= 2) {
+    return;
+  }
+
+  // Select the ingredient
+  state.selectedIngredients.push(id);
+  btn.classList.add("selected");
+  updateSlots();
+}
+
+function updateSlots() {
+  const slot1 = document.getElementById("slot-1");
+  const slot2 = document.getElementById("slot-2");
+
+  const [first, second] = state.selectedIngredients;
+
+  slot1.textContent = first ? CONFIG.INGREDIENTS[first].label : "—";
+  slot2.textContent = second ? CONFIG.INGREDIENTS[second].label : "—";
+}
+
+// Attach click listeners to every ingredient button
+document.querySelectorAll(".ingredient-btn").forEach(btn => {
+  btn.addEventListener("click", handleIngredientClick);
+});
