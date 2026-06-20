@@ -1,13 +1,19 @@
 /* style.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background-color: #0D0D0D;
-  color: #E8DCC8;
-  font-family: 'Crimson Text', serif;
+  background-color: #0f0d12;
+  background-image: url('assets/dungeon-bg.png'); /* <-- update this path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  color: #d4c4a0;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -20,24 +26,25 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 32px;
-  border-bottom: 1px solid #6B5A3E;
-  font-family: 'Cinzel', serif;
-  font-size: 14px;
-  letter-spacing: 0.1em;
+  border-bottom: 2px solid #8b6f47;
+  background: rgba(15, 13, 18, 0.75);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  letter-spacing: 0.05em;
 }
 
 #rep-vial-container {
   width: 120px;
-  height: 14px;
-  border: 1px solid #6B5A3E;
-  border-radius: 2px;
+  height: 16px;
+  border: 2px solid #8b6f47;
   overflow: hidden;
+  image-rendering: pixelated;
 }
 
 #rep-vial-fill {
   height: 100%;
-  width: 100%; /* will be controlled by JS */
-  background-color: #7A1C1C;
+  width: 100%;
+  background-color: #5c1a1a;
   transition: width 0.4s ease;
 }
 
@@ -56,48 +63,49 @@ body {
   justify-content: center;
   padding: 40px;
   gap: 24px;
+  background: rgba(15, 13, 18, 0.7);
 }
 
 #divider {
-  width: 1px;
-  background-color: #6B5A3E;
+  width: 2px;
+  background-color: #8b6f47;
   margin: 40px 0;
 }
 
 /* Patient panel */
 #patient-name {
-  font-family: 'Cinzel', serif;
-  font-size: 22px;
-  color: #E8DCC8;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  color: #d4c4a0;
+  text-align: center;
 }
 
 #patient-portrait {
   width: 120px;
   height: 120px;
-  border: 1px solid #6B5A3E;
-  border-radius: 4px;
+  border: 2px solid #8b6f47;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
-  color: #6B5A3E;
+  color: #8b6f47;
+  image-rendering: pixelated;
 }
 
 #patient-reaction {
-  font-style: italic;
-  font-size: 18px;
+  font-size: 20px;
   text-align: center;
-  color: #B8A898;
-  max-width: 260px;
+  color: #b8a888;
+  max-width: 280px;
   min-height: 54px;
 }
 
 /* Crafting panel */
 .panel-title {
-  font-family: 'Cinzel', serif;
-  font-size: 18px;
-  letter-spacing: 0.12em;
-  color: #6B5A3E;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: #d4732a;
 }
 
 #ingredient-shelf {
@@ -105,28 +113,30 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
 }
 
 .ingredient-btn {
-  background: transparent;
-  border: 1px solid #6B5A3E;
-  color: #E8DCC8;
-  font-family: 'Crimson Text', serif;
-  font-size: 16px;
+  background: rgba(43, 39, 48, 0.85);
+  border: 2px solid #8b6f47;
+  color: #d4c4a0;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
   padding: 10px 16px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  image-rendering: pixelated;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .ingredient-btn:hover {
-  background: #6B5A3E33;
+  background: rgba(139, 111, 71, 0.3);
+  border-color: #e8a23a;
 }
 
 .ingredient-btn.selected {
-  background: #7A1C1C;
-  border-color: #7A1C1C;
-  color: #E8DCC8;
+  background: #5c1a1a;
+  border-color: #d4732a;
+  color: #d4c4a0;
 }
 
 /* Mixing slots */
@@ -134,44 +144,47 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-family: 'Cinzel', serif;
-  font-size: 20px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
 }
 
 .slot {
   width: 120px;
   height: 40px;
-  border: 1px dashed #6B5A3E;
+  border: 2px dashed #8b6f47;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  color: #6B5A3E;
+  font-size: 12px;
+  font-family: 'VT323', monospace;
+  color: #8b6f47;
   letter-spacing: 0.05em;
 }
 
 /* Prescribe button */
 #prescribe-btn {
-  font-family: 'Cinzel', serif;
-  font-size: 16px;
-  letter-spacing: 0.15em;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  letter-spacing: 0.1em;
   padding: 12px 40px;
-  background: transparent;
-  border: 1px solid #7A1C1C;
-  color: #E8DCC8;
+  background: rgba(43, 39, 48, 0.85);
+  border: 2px solid #5c1a1a;
+  color: #d4c4a0;
   cursor: pointer;
+  image-rendering: pixelated;
   transition: background 0.2s;
 }
 
 #prescribe-btn:hover {
-  background: #7A1C1C;
+  background: #5c1a1a;
+  border-color: #e8a23a;
 }
 
 /* Game over screen */
 #gameover-screen {
   position: fixed;
   inset: 0;
-  background: #0D0D0D;
+  background: rgba(15, 13, 18, 0.95);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -183,18 +196,93 @@ body {
 #gameover-screen.hidden { display: none; }
 
 #gameover-title {
-  font-family: 'Cinzel', serif;
-  font-size: 42px;
-  color: #7A1C1C;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 28px;
+  color: #5c1a1a;
 }
 
 #gameover-message {
-  font-size: 20px;
-  color: #B8A898;
-  font-style: italic;
+  font-size: 22px;
+  color: #b8a888;
 }
 
 #restart-btn {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 12px 36px;
+  background: rgba(43, 39, 48, 0.85);
+  border: 2px solid #8b6f47;
+  color: #d4c4a0;
+  cursor: pointer;
+  image-rendering: pixelated;
+}
+
+#restart-btn:hover { background: rgba(139, 111, 71, 0.3); border-color: #e8a23a; }
+#results-screen {
+  position: fixed;
+  inset: 0;
+  background: #0D0D0D;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px;
+  text-align: center;
+  overflow-y: auto;
+}
+
+#results-screen.hidden { display: none; }
+
+#results-title {
+  font-family: 'Cinzel', serif;
+  font-size: 36px;
+  color: #7A1C1C;
+  letter-spacing: 0.1em;
+}
+
+#results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.result-entry {
+  border: 1px solid #6B5A3E;
+  padding: 16px 20px;
+  text-align: left;
+}
+
+.result-entry.deceased {
+  border-color: #7A1C1C;
+  background: #7A1C1C22;
+}
+
+.result-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: #E8DCC8;
+  margin-bottom: 6px;
+}
+
+.result-symptom {
+  font-style: italic;
+  font-size: 14px;
+  color: #B8A898;
+}
+
+.result-status {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #7A1C1C;
+  margin-top: 6px;
+}
+
+#continue-btn {
   font-family: 'Cinzel', serif;
   font-size: 14px;
   letter-spacing: 0.15em;
@@ -206,4 +294,4 @@ body {
   transition: background 0.2s;
 }
 
-#restart-btn:hover { background: #6B5A3E55; }
+#continue-btn:hover { background: #6B5A3E55; }

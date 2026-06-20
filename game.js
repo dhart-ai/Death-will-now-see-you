@@ -4,134 +4,83 @@ const CONFIG = { // GAME SETTINGS
   TOTAL_DAYS: 3,
   PATIENTS_PER_DAY: 3,
   FAILED_RECIPE_PENALTY: -10,
+  MIN_KILLS_TO_WIN: 2,
 
   RECIPES: {
-    "nightshade+valerian_root": { // making a recipe key by joining ingredient ids with a plus sign
+    "nightshade+valerian_root": {
       name: "Quiet Passage",
       delta: -5,
-      strength: 1,
-      daysToKill: 3,
+      healthChange: -25,
       detectable: false,
-      symptoms: [
-        "Complaining of unusual fatigue. Manageable for now.",
-        "Pale and refusing food. Something is wrong.",
-        "Found unresponsive this morning. Cause unclear."
-      ],
       message: "Tastes a little bitter, Doctor..."
     },
     "chalk_powder+nightshade": {
       name: "Obvious Poison",
       delta: -25,
-      strength: 3,
-      daysToKill: 1,
+      healthChange: -50,
       detectable: true,
-      symptoms: [
-        "Collapsed violently. Neighbours heard screaming. Authorities notified."
-      ],
       message: "Something is wrong — I can feel it!"
     },
     "chalk_powder+peppermint_oil": {
       name: "Soothing Tonic",
       delta: 15,
-      strength: 0,
-      daysToKill: null,
+      healthChange: 20,
       detectable: false,
-      symptoms: [
-        "Doing remarkably well. Colour returned to their face.",
-        "Recovering fully. Singing your praises around town.",
-        "Completely healed. Your reputation grows."
-      ],
       message: "I feel better already. Thank you, Doctor."
     },
     "peppermint_oil+valerian_root": {
       name: "Masked Remedy",
       delta: 5,
-      strength: 0,
-      daysToKill: null,
+      healthChange: 10,
       detectable: false,
-      symptoms: [
-        "Seems stable. Mild drowsiness reported.",
-        "No change. Patient continues daily routine.",
-        "Recovered. Nothing remarkable to note."
-      ],
       message: "Tastes a bit odd... but I suppose I trust you."
     },
     "laudanum+nightshade": {
       name: "The Long Sleep",
       delta: -3,
-      strength: 1,
-      daysToKill: 3,
+      healthChange: -15,
       detectable: false,
-      symptoms: [
-        "Sleeping more than usual. Seems peaceful enough.",
-        "Difficult to wake this morning. Family is mildly concerned.",
-        "Passed quietly in their sleep. No one suspects foul play."
-      ],
       message: "Mmm... I feel quite drowsy, Doctor."
     },
     "foxglove_tincture+laudanum": {
       name: "Heart's Quiet",
       delta: -15,
-      strength: 3,
-      daysToKill: 1,
+      healthChange: -40,
       detectable: true,
-      symptoms: [
-        "Passed in their sleep. Family is shaken but not suspicious — yet."
-      ],
       message: "I feel... strange. So very tired..."
     },
     "foxglove_tincture+nightshade": {
       name: "Heart's Failure",
       delta: -30,
-      strength: 3,
-      daysToKill: 1,
+      healthChange: -70,
       detectable: true,
-      symptoms: [
-        "Heart stopped within the hour. A physician is being summoned to investigate."
-      ],
       message: "My chest — something is terribly wrong!"
     },
     "chalk_powder+iron_sulfate": {
       name: "Iron Stomach",
       delta: -8,
-      strength: 0,
-      daysToKill: null,
+      healthChange: -20,
       detectable: true,
-      symptoms: [
-        "Nauseous and pale, but stable. Buys you time.",
-        "Still unwell. Beginning to ask questions.",
-        "Recovering slowly. Suspicion lingers."
-      ],
       message: "My stomach... what did you give me?"
     },
     "laudanum+peppermint_oil": {
       name: "Calm Recovery",
       delta: 10,
-      strength: 0,
-      daysToKill: null,
+      healthChange: 15,
       detectable: false,
-      symptoms: [
-        "Resting comfortably. Trusts you completely.",
-        "Fully recovered. Recommends you to friends.",
-        "In excellent health. Your reputation grows."
-      ],
       message: "I feel wonderfully calm. Thank you, Doctor."
     }
   },
 
-  INERT: { // default "no effect" recipe for when no valid combination is made
+  INERT: {
     name: "Inert Mix",
     delta: -10,
-    strength: 0,
-    daysToKill: null,
+    healthChange: -5,
     detectable: true,
-    symptoms: [
-      "Patient feels no effect. Growing suspicious of your methods."
-    ],
     message: "...Is this actually medicine?"
   },
 
-  INGREDIENTS: { // available ingredients with labels and descriptions
+  INGREDIENTS: {
     nightshade:        { label: "Nightshade",        desc: "A potent toxin. Deadly in the right dose." },
     valerian_root:      { label: "Valerian Root",      desc: "A calming herb. Masks the taste of bitterness." },
     chalk_powder:        { label: "Chalk Powder",        desc: "A neutral filler. Binds other compounds together." },
@@ -142,17 +91,11 @@ const CONFIG = { // GAME SETTINGS
   }
 };
 
-// PATIENTS
-const ALL_PATIENTS = [ // 9 unique patients with names, portraits, and initial health
-  { name: "Edmund Hale",   portrait: "🧓", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "Mary Ashworth", portrait: "👩", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "Thomas Grigg",  portrait: "🧔", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "Clara Dunne",   portrait: "👵", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "Robert Ash",    portrait: "🧑", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "Agnes Moor",    portrait: "👧", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "William Foss",  portrait: "👴", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "Harriet Cole",  portrait: "🧕", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
-  { name: "George Penn",   portrait: "🧒", health: 100, daysRemaining: null, prescription: null, symptomsLog: [], alive: true },
+// PATIENTS — only 3, seen every day across all 3 days
+const ALL_PATIENTS = [
+  { name: "Edmund Hale",   portrait: "🧓", health: 100, alive: true },
+  { name: "Mary Ashworth", portrait: "👩", health: 100, alive: true },
+  { name: "Thomas Grigg",  portrait: "🧔", health: 100, alive: true },
 ];
 
 // GAME STATE
@@ -170,24 +113,27 @@ let state = {
 // SANITY CHECK
 console.log("CONFIG loaded:", CONFIG);
 console.log("State loaded:", state);
-console.log("Day 1 patients:", ALL_PATIENTS.slice(0, 3));
+console.log("Day 1 patients:", ALL_PATIENTS);
 
 // RENDER FUNCTIONS
-function renderPatient() { // updates the UI with the current patient's info and resets ingredient selections
-  const patient = ALL_PATIENTS[state.currentPatientIndex]; // get current patient based on index
+function renderPatient() {
+  const patientIndex = state.patientsSeenToday;
+  const patient = ALL_PATIENTS[patientIndex];
+  state.currentPatientIndex = patientIndex;
 
   document.getElementById("patient-name").textContent = patient.name;
   document.getElementById("patient-portrait").textContent = patient.portrait;
-  document.getElementById("patient-reaction").textContent = "Awaiting prescription...";
+  document.getElementById("patient-reaction").textContent =
+    `Health: ${patient.health} — Awaiting prescription...`;
 
   document.getElementById("round-counter").textContent =
-    `Day ${state.currentDay} — Patient ${state.patientsSeenToday + 1} of ${CONFIG.PATIENTS_PER_DAY}`; // show current day and patient number
+    `Day ${state.currentDay} — Patient ${state.patientsSeenToday + 1} of ${CONFIG.PATIENTS_PER_DAY}`;
 
-  const repPercent = (state.reputation / CONFIG.MAX_REPUTATION) * 100; // calculate reputation percentage for the vial fill
-  document.getElementById("rep-vial-fill").style.width = repPercent + "%"; // update vial fill based on reputation
+  const repPercent = (state.reputation / CONFIG.MAX_REPUTATION) * 100;
+  document.getElementById("rep-vial-fill").style.width = repPercent + "%";
 
   state.selectedIngredients = [];
-  document.querySelectorAll(".ingredient-btn").forEach(btn => btn.classList.remove("selected")); // reset ingredient button states
+  document.querySelectorAll(".ingredient-btn").forEach(btn => btn.classList.remove("selected"));
   document.getElementById("slot-1").textContent = "—";
   document.getElementById("slot-2").textContent = "—";
 }
@@ -195,14 +141,14 @@ function renderPatient() { // updates the UI with the current patient's info and
 function renderIngredientDescriptions() {
   document.querySelectorAll(".ingredient-btn").forEach(btn => {
     const id = btn.dataset.id;
-    const info = CONFIG.INGREDIENTS[id]; // get ingredient info from config using data-id attribute
+    const info = CONFIG.INGREDIENTS[id];
     btn.title = info.desc;
   });
 }
 
 // INIT
 function init() {
-  renderIngredientDescriptions(); // set up ingredient button tooltips
+  renderIngredientDescriptions();
   renderPatient();
 }
 
@@ -212,9 +158,8 @@ init();
 
 function handleIngredientClick(event) {
   const btn = event.currentTarget;
-  const id = btn.dataset.id; // get ingredient id from data attribute
+  const id = btn.dataset.id;
 
-  // If already selected, clicking again deselects it
   if (state.selectedIngredients.includes(id)) {
     state.selectedIngredients = state.selectedIngredients.filter(ing => ing !== id);
     btn.classList.remove("selected");
@@ -222,12 +167,10 @@ function handleIngredientClick(event) {
     return;
   }
 
-  // Don't allow more than 2 ingredients selected at once
   if (state.selectedIngredients.length >= 2) {
     return;
   }
 
-  // Select the ingredient
   state.selectedIngredients.push(id);
   btn.classList.add("selected");
   updateSlots();
@@ -243,59 +186,57 @@ function updateSlots() {
   slot2.textContent = second ? CONFIG.INGREDIENTS[second].label : "—";
 }
 
-// Attach click listeners to every ingredient button
 document.querySelectorAll(".ingredient-btn").forEach(btn => {
   btn.addEventListener("click", handleIngredientClick);
 });
 
 // STAGE 5: PRESCRIBE LOGIC
 
-function matchRecipe(ingredients) { // takes your two selected ingredients, sorts them alphabetically, joins them into a key like "nightshade+valerian_root", and looks that up in CONFIG.RECIPES
-
-  // Sort alphabetically and join with "+" so order doesn't matter
+function matchRecipe(ingredients) {
   const key = [...ingredients].sort().join("+");
-
-  // Look for a match in CONFIG.RECIPES
   return CONFIG.RECIPES[key] || CONFIG.INERT;
 }
 
 function handlePrescribe() {
-  // Don't allow prescribing with fewer than 2 ingredients
   if (state.selectedIngredients.length !== 2) {
     return;
   }
 
   const patient = ALL_PATIENTS[state.currentPatientIndex];
-  const recipe = matchRecipe(state.selectedIngredients);
 
-  // Check for consecutive identical recipe penalty
-  let delta = recipe.delta;
-  if (state.lastRecipeUsed === recipe.name && delta < 0) {
-    delta = delta * 2; // double the penalty
+  if (!patient.alive) {
+    return;
   }
 
-  // Apply reputation change
+  const recipe = matchRecipe(state.selectedIngredients);
+
+  let delta = recipe.delta;
+  if (state.lastRecipeUsed === recipe.name && delta < 0) {
+    delta = delta * 2;
+  }
   state.reputation = Math.max(0, Math.min(CONFIG.MAX_REPUTATION, state.reputation + delta));
   state.lastRecipeUsed = recipe.name;
 
-  // Store the prescription on the patient for the overnight results screen later
-  patient.prescription = recipe;
-  patient.daysRemaining = recipe.daysToKill;
+  patient.health = Math.max(0, Math.min(100, patient.health + recipe.healthChange));
 
-  // Show the patient's immediate reaction
-  document.getElementById("patient-reaction").textContent = recipe.message;
+  if (patient.health <= 0) {
+    patient.alive = false;
+  }
 
-  // Update the reputation bar
+  document.getElementById("patient-reaction").textContent =
+    patient.alive
+      ? `${recipe.message} (Health: ${patient.health})`
+      : `${patient.name} has died.`;
+
   const repPercent = (state.reputation / CONFIG.MAX_REPUTATION) * 100;
   document.getElementById("rep-vial-fill").style.width = repPercent + "%";
 
-  // Check for immediate game over
   if (state.reputation <= 0) {
     triggerGameOver();
     return;
   }
 
-  console.log(`Prescribed "${recipe.name}" to ${patient.name}. Reputation delta: ${delta}. New reputation: ${state.reputation}`);
+  console.log(`Prescribed "${recipe.name}" to ${patient.name}. Health: ${patient.health}. Alive: ${patient.alive}. Reputation: ${state.reputation}`);
   handlePrescribeComplete();
 }
 
@@ -304,25 +245,22 @@ function triggerGameOver() {
   document.getElementById("gameover-screen").classList.remove("hidden");
 }
 
-// Attach click listener to Prescribe button
 document.getElementById("prescribe-btn").addEventListener("click", handlePrescribe);
 
 // STAGE 6: PATIENT / DAY PROGRESSION
 
 function handlePrescribeComplete() {
-  // Disable prescribing again until next patient loads
-  document.getElementById("prescribe-btn").classList.add("hidden"); // hide prescribe button
-  document.getElementById("next-btn").classList.remove("hidden"); // show next patient button
+  document.getElementById("prescribe-btn").classList.add("hidden");
+  document.getElementById("next-btn").classList.remove("hidden");
 }
 
 function goToNextPatient() {
-  state.patientsSeenToday++; // increment patients seen today
-  state.currentPatientIndex++; // move to next patient in the ALL_PATIENTS array
+  state.patientsSeenToday++;
 
-  const dayComplete = state.patientsSeenToday >= CONFIG.PATIENTS_PER_DAY; // check if we've seen enough patients to complete the day
+  const dayComplete = state.patientsSeenToday >= CONFIG.PATIENTS_PER_DAY;
 
-  if (dayComplete) { // reset for next day
-    showOvernightResults(); // show overnight results before moving to next day
+  if (dayComplete) {
+    showOvernightResults();
   } else {
     document.getElementById("next-btn").classList.add("hidden");
     document.getElementById("prescribe-btn").classList.remove("hidden");
@@ -332,9 +270,77 @@ function goToNextPatient() {
 
 function showOvernightResults() {
   state.gameState = "results";
-  console.log("Day complete. Time to show overnight results (Stage 6 Part B).");
-  // We'll build the actual results screen next
+
+  const resultsList = document.getElementById("results-list");
+  resultsList.innerHTML = "";
+
+  ALL_PATIENTS.forEach(patient => {
+    const isDeceased = !patient.alive;
+    const statusText = isDeceased
+      ? "Found unresponsive this morning."
+      : `Health: ${patient.health} / 100`;
+
+    renderResultEntry(patient, statusText, isDeceased);
+  });
+
+  document.getElementById("game-screen").classList.add("hidden");
+  document.getElementById("hud").classList.add("hidden");
+  document.getElementById("results-screen").classList.remove("hidden");
 }
 
-// Attach click listener to Next Patient button
+function renderResultEntry(patient, symptomText, isDeceased) {
+  const entry = document.createElement("div");
+  entry.className = isDeceased ? "result-entry deceased" : "result-entry";
+
+  entry.innerHTML = `
+    <div class="result-name">${patient.portrait} ${patient.name}</div>
+    <div class="result-symptom">${symptomText}</div>
+    ${isDeceased ? '<div class="result-status">DECEASED</div>' : ''}
+  `;
+
+  document.getElementById("results-list").appendChild(entry);
+}
+
+function continueToNextDay() {
+  document.getElementById("results-screen").classList.add("hidden");
+  document.getElementById("hud").classList.remove("hidden");
+  document.getElementById("game-screen").classList.remove("hidden");
+
+  state.currentDay++;
+  state.patientsSeenToday = 0;
+
+  if (state.currentDay > CONFIG.TOTAL_DAYS) {
+    triggerWin();
+    return;
+  }
+
+  state.gameState = "playing";
+  document.getElementById("next-btn").classList.add("hidden");
+  document.getElementById("prescribe-btn").classList.remove("hidden");
+  renderPatient();
+}
+
+function getKillCount() {
+  return ALL_PATIENTS.filter(p => !p.alive).length;
+}
+
+function triggerWin() {
+  const kills = getKillCount();
+
+  if (kills >= CONFIG.MIN_KILLS_TO_WIN) {
+    state.gameState = "win";
+    document.getElementById("gameover-title").textContent = "Death is Satisfied.";
+    document.getElementById("gameover-message").textContent =
+      `You survived all ${CONFIG.TOTAL_DAYS} days and claimed ${kills} of ${ALL_PATIENTS.length} patients. Your secret is safe... for now.`;
+  } else {
+    state.gameState = "gameover";
+    document.getElementById("gameover-title").textContent = "Death is Displeased.";
+    document.getElementById("gameover-message").textContent =
+      `You survived, but only claimed ${kills} of the required ${CONFIG.MIN_KILLS_TO_WIN} patients. Death demands more.`;
+  }
+
+  document.getElementById("gameover-screen").classList.remove("hidden");
+}
+
+document.getElementById("continue-btn").addEventListener("click", continueToNextDay);
 document.getElementById("next-btn").addEventListener("click", goToNextPatient);
