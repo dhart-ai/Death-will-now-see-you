@@ -344,3 +344,36 @@ function triggerWin() {
 
 document.getElementById("continue-btn").addEventListener("click", continueToNextDay);
 document.getElementById("next-btn").addEventListener("click", goToNextPatient);
+
+// RESTART LOGIC
+
+function restartGame() {
+  // Reset all patients back to full health and alive
+  ALL_PATIENTS.forEach(patient => {
+    patient.health = 100;
+    patient.alive = true;
+  });
+
+  // Reset game state
+  state.currentDay = 1;
+  state.currentPatientIndex = 0;
+  state.patientsSeenToday = 0;
+  state.reputation = CONFIG.STARTING_REPUTATION;
+  state.gameState = "playing";
+  state.selectedIngredients = [];
+  state.lastRecipeUsed = null;
+
+  // Hide game over / results screens, show main game
+  document.getElementById("gameover-screen").classList.add("hidden");
+  document.getElementById("results-screen").classList.add("hidden");
+  document.getElementById("hud").classList.remove("hidden");
+  document.getElementById("game-screen").classList.remove("hidden");
+
+  // Reset buttons
+  document.getElementById("next-btn").classList.add("hidden");
+  document.getElementById("prescribe-btn").classList.remove("hidden");
+
+  renderPatient();
+}
+
+document.getElementById("restart-btn").addEventListener("click", restartGame);
